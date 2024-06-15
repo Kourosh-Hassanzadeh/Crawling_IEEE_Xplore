@@ -23,8 +23,7 @@ def get_links():
     links = []
     paper_elements = driver.find_elements(By.XPATH, "//a[@class='fw-bold']")
     for paper in paper_elements:
-        if "courses" not in paper.get_attribute('href'):
-            links.append(paper.get_attribute('href'))
+        links.append(paper.get_attribute('href'))
     return links
 
 
@@ -37,7 +36,14 @@ def extract_article_info(links):
         if 'courses' not in art:
 
             driver.get(art)
-            time.sleep(1)
+            wait_page_load(driver)
+
+            content = driver.find_element(By.XPATH, '/html/body/meta[8]').get_attribute('content')
+
+            if "Journals" in content or "Standards" in content or "Courses" in content:
+                continue
+
+            # time.sleep(1)
 
             article_info = {}
             article_info['title'] = driver.find_element(
@@ -71,7 +77,7 @@ def extract_article_info(links):
                 article_info['Full Text Views'] = None
 
             article_info['Publisher'] = driver.find_element(
-                By.XPATH, '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/div/div[2]/section/div[2]/div/xpl-document-abstract/section/div[2]/div[3]/div[2]/div[2]/xpl-publisher/span/span/span/span[2]').text
+                By.XPATH, '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/div/div[1]/xpl-publisher/span/span/span/span[2]').text
 
             article_info['DOI'] = driver.find_element(
                 By.XPATH, '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/div/div[2]/section/div[2]/div/xpl-document-abstract/section/div[2]/div[3]/div[2]/div[1]/a').text
@@ -129,9 +135,9 @@ def extract_article_info(links):
                 By.XPATH, '//*[@id="keywords"]')
             
             
-            if article_info['title'] == 'Security Assessment Model for Blockchain Software and Hardware Fusion Device Based on Decision Tree Algorithm':
-                keywords_element = driver.find_element(
-                    By.XPATH, '//*[@id="document-tabs"]/div[5]/a')
+            # if article_info['title'] == 'Security Assessment Model for Blockchain Software and Hardware Fusion Device Based on Decision Tree Algorithm':
+            #     keywords_element = driver.find_element(
+            #         By.XPATH, '//*[@id="document-tabs"]/div[5]/a')
 
             keywords_element.click()
 
@@ -150,6 +156,12 @@ def extract_article_info(links):
     driver.close()
     driver.switch_to.window(original_window)
     return data
+
+def wait_page_load(driver):
+    """wait until 'Feedbak' button appeared"""
+    WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.CLASS_NAME, 'usabilla_live_button_container'))
+    )
 
 
 try:
