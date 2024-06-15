@@ -8,8 +8,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.window import WindowTypes
-import time
-from selenium.webdriver import ActionChains
 import json
 import re
 
@@ -182,7 +180,6 @@ def change_pages(driver):
         links = get_links()
         data = extract_article_info(links=links)
         all_data.append(data)
-        # print(data)
         i += 1
 
     return all_data
