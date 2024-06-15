@@ -1,3 +1,4 @@
+import selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -22,12 +23,15 @@ def get_links():
     links = []
     paper_elements = driver.find_elements(By.XPATH, "//a[@class='fw-bold']")
     for paper in paper_elements:
-        links.append(paper.get_attribute('href'))
+        if "courses" not in paper.get_attribute('href'):
+            links.append(paper.get_attribute('href'))
     return links
 
 
 def extract_article_info(links):
     data = []
+    original_window = driver.current_window_handle
+
     driver.switch_to.new_window(WindowTypes.TAB)
     for art in links:
         if 'courses' not in art:
@@ -118,8 +122,13 @@ def extract_article_info(links):
 
             article_info['Authors'] = [authors]
 
+            # keywords_element = driver.find_element(
+            #     By.XPATH, '//*[@id="document-tabs"]/div[6]/a')
+            
             keywords_element = driver.find_element(
-                By.XPATH, '//*[@id="document-tabs"]/div[6]/a')
+                By.XPATH, '//*[@id="keywords"]')
+            
+            
             if article_info['title'] == 'Security Assessment Model for Blockchain Software and Hardware Fusion Device Based on Decision Tree Algorithm':
                 keywords_element = driver.find_element(
                     By.XPATH, '//*[@id="document-tabs"]/div[5]/a')
@@ -138,7 +147,8 @@ def extract_article_info(links):
             article_info['Author Keywords'] = author_keywords
 
             data.append(article_info)
-    driver.switch_to.window(driver.window_handles[0])
+    driver.close()
+    driver.switch_to.window(original_window)
     return data
 
 
