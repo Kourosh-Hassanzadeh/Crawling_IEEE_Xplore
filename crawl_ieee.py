@@ -36,16 +36,11 @@ def extract_article_info(links):
         if 'courses' not in art:
 
             driver.get(art)
-            # wait_page_load(driver)
+            wait_page_load(driver)
 
             content = driver.find_element(By.XPATH, '/html/body/meta[8]').get_attribute('content')
 
-            # if "Journals" in content or "Standards" in content or "Courses" in content:
-            #     continue
             if "Conferences" in content:
-
-                # time.sleep(1)
-
                 article_info = {}
                 article_info['title'] = driver.find_element(
                     By.CLASS_NAME, 'document-title').text
@@ -132,18 +127,19 @@ def extract_article_info(links):
                         name = author_info.find_element(By.CSS_SELECTOR, 'a span')
 
                         author_name = name.text.strip()
+                        
                         from_element = author_info.find_element(
                             By.CSS_SELECTOR, 'div:nth-child(2)')
                         try:
                             second_from = author_info.find_element(
                                 By.CSS_SELECTOR, 'div:nth-child(3)')
-                            from_ = {from_element.text.strip(),
-                                    second_from.text.strip()}
+                            from_ = [from_element.text.strip(),
+                                    second_from.text.strip()]
                         except:
                             from_ = from_element.text.strip()
                         authors.append({"name": author_name, "from": from_})
 
-                    article_info['Authors'] = [authors]
+                    article_info['Authors'] = authors
                 except:
                     article_info['Authors'] = None
 
@@ -166,7 +162,7 @@ def extract_article_info(links):
                 except:
                     article_info['IEEE Keywords'] = None
                     article_info['Author Keywords'] = None
-                    
+
                 data.append(article_info)
 
     driver.close()
@@ -223,10 +219,7 @@ try:
     final_result = {'relevance': all_data_relevance, 'newest': all_data_newest}
 
     with open('output.json', 'w') as f:
-        json.dumps(final_result, f, indent=4)
-
-        # time.sleep(5)
-
+        json.dump(final_result, f, indent=4)
 
 except Exception as e:
     print(e)
